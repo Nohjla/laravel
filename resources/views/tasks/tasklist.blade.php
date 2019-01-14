@@ -19,10 +19,11 @@
 	<div class="container">
 		<div class="row">
 			<div class="col">
-				<form>
+				<form action="/newtask" method="POST">
+					{{ csrf_field()}}
 				  <div class="form-group">
 				    <label>Task name:</label>
-				    <input type="email" class="form-control" id="newtask" name="newtask">
+				    <input type="text" class="form-control" id="newtask" name="newtask">
 				    <button type="submit" class="btn btn-primary">Add task</button>
 				  </div>
 				</form>
@@ -40,22 +41,23 @@
 						</tr>
 					</thead>
 					<tbody>
+
+						@foreach($tasks as $task)
 						<tr>
-							<td>Sample Task 1</td>
-							<td>5 mins ago</td>
 							<td>
-								<button type="button" class="btn btn-danger" onclick="openDeleteModal()" data-toggle="modal">Delete</button>
-								<button type="button" class="btn btn-primary" onclick="openEditModal()" data-toggle="modal">Edit</button>
+							{{
+							$task->name
+							}}
+							</td>
+							<td>
+							{{$task->created_at}}
+							</td>
+							<td>
+							<button type="button" class="btn btn-danger" onclick="openDeleteModal({{$task->id}},'{{$task->name}}')" data-toggle="modal">Delete</button>
+							<button type="button" class="btn btn-primary" onclick="openEditModal({{$task->id}},'{{$task->name}}')" data-toggle="modal">Edit</button>
 							</td>
 						</tr>
-						<tr>
-							<td>Sample Task 2</td>
-							<td>5 mins ago</td>
-							<td>
-								<button type="button" class="btn btn-danger" onclick="openDeleteModal()" data-toggle="modal">Delete</button>
-								<button type="button" class="btn btn-primary" onclick="openEditModal()" data-toggle="modal">Edit</button>
-							</td>
-						</tr>
+						@endforeach
 					</tbody>
 				</table>
 			</div>
@@ -74,7 +76,14 @@
 	        </button>
 	      </div>
 	      <div class="modal-body">
+	      	<form id="deleteTask" method="POST">
+	      	{{ csrf_field()}}
+	      	{{ method_field('DELETE')}}
+	      	<span id ="Taskdel">
 	        Do you want to delete this task?
+	      	</span>
+	      	<button type="submit" class="btn btn-danger">Delete</button>
+	      	</form>
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -95,9 +104,11 @@
 	        </button>
 	      </div>
 	      <div class="modal-body">
-	        	<form>
+	        	<form id="editTaskForm" method="POST">
+	        		{{ csrf_field()}}
+	      			{{ method_field('PUT')}}
 	        		<label>Task:</label>
-	        		<input type="text" name="editedtask"></input>
+	        		<input type="text" name="editedtask" id="editedtask"></input>
 	        		<button type="submit" class="btn btn-primary">Save changes</button>
 	        	</form>
 	      </div>
@@ -109,10 +120,14 @@
 	</div>
 
 <script type="text/javascript">
-	function openDeleteModal(){
+	function openDeleteModal(id,name){
+		$('#deleteTask').attr("action", "/taskdelete/"+id);
+		$('#Taskdel').html('Do you want to delete task ' + name + '?');
 		$("#deleteModal").modal("show");
 	}
-	function openEditModal(){
+	function openEditModal(id,name){
+		$('#editedtask').val(name);
+		$("#editTaskForm").attr("action","taskupdate/"+id);
 		$("#editModal").modal("show");
 	}
 
